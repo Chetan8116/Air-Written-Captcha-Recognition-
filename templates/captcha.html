@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CAPTCHA Verification</title>
+    <link rel="stylesheet" href="/static/arrow.css">
+    <style>
+        .captcha-img { margin-bottom: 10px; }
+        .captcha-container { max-width: 400px; margin: auto; padding: 30px; background: #f9f9f9; border-radius: 8px; }
+        .captcha-input { width: 100%; padding: 8px; margin-bottom: 10px; }
+        .btn { padding: 8px 16px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        .btn:hover { background: #0056b3; }
+        .flash { margin-bottom: 10px; color: red; }
+    </style>
+</head>
+<body>
+    <div class="captcha-container">
+        <h2>CAPTCHA Verification</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <img class="captcha-img" src="data:image/png;base64,{{ captcha_img }}" alt="CAPTCHA">
+        <form method="POST">
+            <input class="captcha-input" type="text" name="captcha_input" placeholder="Enter CAPTCHA" required>
+            <button class="btn" type="submit">Verify</button>
+        </form>
+        <div style="margin-top: 10px; display: flex; justify-content: space-between;">
+            <form action="/refresh_captcha" method="POST" style="display: inline;">
+                <button class="btn" type="submit" style="background-color: #6c757d;">Refresh CAPTCHA</button>
+            </form>
+            <form action="/toggle_realistic_captcha" method="POST" style="display: inline;">
+                <button class="btn" type="submit" style="background-color: #28a745;">Toggle Realistic CAPTCHA</button>
+            </form>
+        </div>
+        <div style="margin-top: 10px; display: flex; justify-content: center;">
+            <form action="/toggle_comprehensive_captcha" method="POST" style="display: inline;">
+                <button class="btn" type="submit" style="background-color: #17a2b8;">Switch CAPTCHA Generator</button>
+            </form>
+        </div>
+        <hr>
+        <p>Or solve with:</p>
+        <div style="margin-top: 10px;">
+            <a href="/" class="btn" style="margin-right: 10px;">Air-Writing (Simple)</a>
+            <a href="/captcha-drawing" class="btn">Air-Writing (Enhanced)</a>
+        </div>
+    </div>
+</body>
+</html>

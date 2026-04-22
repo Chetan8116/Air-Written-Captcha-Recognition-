@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Air Writing Recognition</title>
+    <link rel="stylesheet" href="/static/arrow.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="/static/mode-display.js"></script>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            --success-gradient: linear-gradient(135deg, #0891b2 0%, #22d3ee 100%);
+            --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            --danger-gradient: linear-gradient(135deg, #dc2626 0%, #fb7185 100%);
+            --card-shadow: 0 14px 36px rgba(15, 54, 52, 0.14);
+        }
+        
+        body {
+            background:
+                radial-gradient(circle at 0% 10%, rgba(20, 184, 166, 0.18), transparent 35%),
+                radial-gradient(circle at 100% 90%, rgba(245, 158, 11, 0.18), transparent 32%),
+                linear-gradient(155deg, #f7faf9 0%, #eef4f4 100%);
+            min-height: 100vh;
+            font-family: 'Space Grotesk', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #142222;
+        }
+        
+        .main-title {
+            font-family: 'Sora', 'Space Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: clamp(2rem, 3vw, 2.8rem);
+            text-align: center;
+            margin: 0.5rem 0 1.75rem;
+            letter-spacing: -0.02em;
+            color: #0f3b39;
+            text-shadow: 0 2px 0 rgba(255, 255, 255, 0.8);
+        }
+        
+        .card {
+            border: 1px solid #d7e5e3;
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            backdrop-filter: blur(4px);
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 42px rgba(15, 54, 52, 0.2);
+        }
+        
+        .camera-feed-card .card-header {
+            background: var(--primary-gradient);
+            border: none;
+            padding: 1.2rem 1.4rem;
+        }
+        
+        .recognition-card .card-header {
+            background: var(--success-gradient);
+            border: none;
+            padding: 1.2rem 1.4rem;
+        }
+        
+        .camera-feed {
+            border-radius: 18px;
+            box-shadow: 0 8px 18px rgba(15, 54, 52, 0.18);
+            transition: transform 0.3s ease;
+            border: 2px solid #d4e6e3;
+        }
+        
+        .camera-feed:hover {
+            transform: scale(1.02);
+        }
+        
+        .mode-buttons .btn {
+            border-radius: 14px;
+            padding: 0.72rem 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin: 0 0.25rem;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .mode-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-success, .btn-outline-success {
+            background: var(--success-gradient);
+            border: none;
+        }
+        
+        .btn-outline-success {
+            background: transparent;
+            border: 2px solid #11998e;
+            color: #11998e;
+        }
+        
+        .btn-warning, .btn-outline-warning {
+            background: var(--warning-gradient);
+            border: none;
+            color: #3f2a00;
+        }
+        
+        .btn-outline-warning {
+            background: transparent;
+            border: 1px solid #f59e0b;
+            color: #b45309;
+        }
+
+        .btn-secondary, .btn-outline-secondary {
+            border-radius: 14px;
+            font-weight: 600;
+        }
+
+        .btn-outline-secondary {
+            border: 1px solid #89a1a0;
+            color: #3c5857;
+            background: transparent;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #4b6260 0%, #2f4140 100%);
+            border: none;
+        }
+        
+        .btn-danger {
+            background: var(--danger-gradient);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
+        }
+        
+        .control-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            box-shadow: var(--card-shadow);
+            border-left: 5px solid #667eea;
+        }
+        
+        .section-title {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+        
+        .section-title i {
+            margin-right: 0.5rem;
+            color: #667eea;
+        }
+        
+        .alert {
+            border: none;
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .captcha-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            background: linear-gradient(145deg, #ffffff, #f2f9f8);
+            border: 1px solid #d7e5e3;
+            border-radius: 22px;
+            padding: 1.6rem;
+            box-shadow: 0 14px 36px rgba(10, 66, 63, 0.12);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .captcha-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #0f766e, #14b8a6, #f59e0b);
+            border-radius: 22px 22px 0 0;
+        }
+        
+        .captcha-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .captcha-icon {
+            font-size: 1.5rem;
+            color: #667eea;
+            margin-right: 1rem;
+            padding: 0.5rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 50%;
+        }
+        
+        .captcha-title {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1.1rem;
+        }
+        
+        .captcha-subtitle {
+            color: #718096;
+            font-size: 0.85rem;
+        }
+        
+        .captcha-display {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .captcha-image-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        
+        .captcha-image {
+            border-radius: 16px;
+            box-shadow: 0 12px 26px rgba(10, 66, 63, 0.15);
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            min-height: 120px;
+            border: 2px solid #cde2df;
+        }
+        
+        .captcha-image:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .captcha-instruction {
+            color: #4a5568;
+            font-size: 0.9rem;
+            margin: 0;
+            font-style: italic;
+        }
+        
+        .captcha-form {
+            margin-bottom: 0.75rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+            text-align: center;
+        }
+        
+        .captcha-input-group {
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            width: 80%;
+            max-width: 320px;
+            margin: auto;
+            gap: 0;
+        }
+        
+        .captcha-input-row {
+            display: flex;
+            align-items: stretch;
+        }
+        
+        .captcha-input-group:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .captcha-input-field {
+            flex: 1;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Courier New', monospace;
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: 0.5rem;
+            text-align: center;
+            background: transparent;
+            color: #2d3748;
+            transition: all 0.3s ease;
+        }
+        
+        .captcha-input-field:focus {
+            outline: none;
+        }
+        
+        .captcha-input-field::placeholder {
+            color: #a0aec0;
+        }
+        
+        .input-counter {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            background: rgba(15, 118, 110, 0.1);
+            color: #0f766e;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+        
+        .verify-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            width: 100%;
+            border-radius: 0 0 15px 15px;
+            font-size: 1rem;
+        }
+        
+        .verify-btn:hover {
+            background: linear-gradient(135deg, #5a67d8, #6b46c1);
+            transform: translateX(5px);
+        }
+        
+        .verify-btn-left {
+            background: linear-gradient(135deg, #0f766e, #0e9f93);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        
+        .verify-btn-left:hover {
+            background: linear-gradient(135deg, #0d665f, #0b877d);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(15, 118, 110, 0.34);
+        }
+        
+        .captcha-input-field-new {
+            border: none;
+            background: transparent;
+            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Courier New', monospace;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5rem;
+            text-align: center;
+            color: #2d3748;
+            padding: 0.5rem 1rem;
+        }
+        
+        .captcha-input-field-new:focus {
+            outline: none;
+            box-shadow: none;
+        }
+        
+        .captcha-input-field-new::placeholder {
+            color: #a0aec0;
+        }
+        
+        .captcha-actions {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            gap: 1rem;
+            flex-wrap: nowrap;
+        }
+        
+        .form-check.form-switch {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .form-check-input {
+            cursor: pointer;
+            margin-right: 5px;
+            height: 1.25rem;
+            width: 2.5rem;
+        }
+        
+        .form-check-input:checked {
+            background-color: #4299e1;
+            border-color: #4299e1;
+        }
+        
+        .form-check-label {
+            color: #4a5568;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .toggle-container {
+            background-color: rgba(237, 242, 247, 0.7);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* Responsive design for zoom and container scaling */
+        @media (max-width: 768px) {
+            .captcha-container {
+                padding: 1.5rem;
+                gap: 1rem;
+            }
+            
+            .captcha-image {
+                min-height: 100px;
+            }
+            
+            .captcha-input-field {
+                font-size: 1.1rem;
+                padding: 0.8rem 1.2rem;
+            }
+            
+            .verify-btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .verify-btn-left {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .captcha-input-field-new {
+                font-size: 1.2rem;
+                letter-spacing: 0.3rem;
+            }
+            
+            .captcha-actions {
+                flex-direction: row;
+                gap: 0.5rem;
+                justify-content: center;
+            }
+            
+            .refresh-btn, .clear-btn {
+                flex: 1;
+                max-width: 150px;
+            }
+        }
+        
+        /* Ensure elements scale with container size changes */
+        .captcha-container {
+            container-type: inline-size;
+        }
+        
+        @container (max-width: 350px) {
+            .captcha-input-field {
+                font-size: 1rem;
+                letter-spacing: 0.3rem;
+            }
+            
+            .verify-btn {
+                font-size: 0.85rem;
+                padding: 0.75rem 1rem;
+            }
+        }
+        
+        .refresh-btn, .clear-btn, .backspace-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+        
+        .refresh-btn {
+            border-color: #0891b2;
+            color: #0e7490;
+        }
+        
+        .refresh-btn:hover {
+            background: #0e7490;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(14, 116, 144, 0.35);
+        }
+        
+        .clear-btn {
+            border-color: #f56565;
+            color: #f56565;
+        }
+        
+        .clear-btn:hover {
+            background: #f56565;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 101, 101, 0.3);
+        }
+        
+        .backspace-btn {
+            border-color: #ed8936;
+            color: #ed8936;
+        }
+        
+        .backspace-btn:hover {
+            background: #ed8936;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(237, 137, 54, 0.3);
+        }
+        
+        .add-char-btn {
+            background: linear-gradient(135deg, #0ea5a3, #14b8a6);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .add-char-btn:hover {
+            background: linear-gradient(135deg, #0d8f8d, #0f9e8f);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(15, 158, 143, 0.32);
+        }
+
+        @keyframes fadeUpIn {
+            from {
+                opacity: 0;
+                transform: translateY(22px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes titlePop {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+                letter-spacing: 0.02em;
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                letter-spacing: -0.02em;
+            }
+        }
+
+        .reveal {
+            opacity: 0;
+        }
+
+        body.ready .reveal {
+            animation: fadeUpIn 0.65s cubic-bezier(0.21, 1, 0.31, 1) forwards;
+        }
+
+        body.ready .reveal-2 {
+            animation-delay: 0.1s;
+        }
+
+        body.ready .reveal-3 {
+            animation-delay: 0.2s;
+        }
+
+        body.ready .main-title {
+            animation: titlePop 0.75s cubic-bezier(0.21, 1, 0.31, 1) both;
+        }
+        
+        /* Notification animations */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        /* Enhanced input field animations */
+        .captcha-input-field {
+            transition: all 0.3s ease;
+        }
+        
+        /* Loading spinner animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #d6f4f2 0%, #beecea 100%);
+            color: #0f4f4b;
+        }
+        
+        .instructions-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            border-left: 5px solid #38ef7d;
+        }
+        
+        .instructions-card ul li {
+            margin: 0.75rem 0;
+            font-size: 1.05rem;
+            color: #555;
+        }
+        
+        .instructions-card ul li strong {
+            color: #333;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .refresh-btn {
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+        }
+
+        .card-body {
+            background: linear-gradient(180deg, #ffffff 0%, #fcfefe 100%);
+        }
+
+        .mode-buttons {
+            background: #f3f7f6;
+            border: 1px solid #d9e7e5;
+            border-radius: 16px;
+            padding: 0.65rem;
+            transition: box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .mode-buttons.mode-switch {
+            border-color: #7dd3c6;
+            box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.18);
+        }
+
+        .mode-buttons .col-6 {
+            padding-left: 0.35rem;
+            padding-right: 0.35rem;
+        }
+
+        .captcha-image.refreshing {
+            opacity: 0.45;
+            filter: blur(1px) saturate(0.9);
+            transform: scale(0.985);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+        
+
+    </style>
+</head>
+<body>
+    <div class="container-fluid px-4 py-3">
+        <h1 class="main-title">
+            <i class="fas fa-hand-paper me-3"></i>Air Writing Recognition
+        </h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>{{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="row g-4">
+            <div class="col-lg-8 reveal reveal-1">
+                <div class="card camera-feed-card">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-camera me-2"></i>Live Camera Feed
+                        </h5>
+                        <form method="post" action="{{ url_for('refresh_camera') }}" style="display: inline;">
+                            <button type="submit" class="btn btn-light refresh-btn">
+                                <i class="fas fa-sync-alt me-1"></i>Refresh
+                            </button>
+                        </form>
+                    </div>
+                    <div class="card-body text-center p-4">
+                        <img src="/video_feed" width="100%" alt="Video Feed" class="camera-feed" id="videoElement">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 reveal reveal-2">
+                <div class="card recognition-card">
+                    <div class="card-header text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-brain me-2"></i>Recognition
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Modern Captcha Challenge Section -->
+                        <div class="mb-4 captcha-container reveal reveal-3">
+                           
+                            
+                            
+                            <div class="captcha-display">
+                                <div class="captcha-image-container">
+                                    <img src="data:image/png;base64,{{ captcha_img }}" alt="Captcha Challenge" class="captcha-image" id="captcha-image">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="recognized_input" class="form-label">
+                                    Enter the digits you drew:
+                                </label>
+                                <div class="alert alert-light d-flex align-items-center">
+                                    <form method="POST" action="/verify_captcha" class="d-flex align-items-center w-100 mb-0">
+                                        <button type="submit" class="btn btn-primary me-3 verify-btn-left">
+                                            <i class="fas fa-check-circle me-2"></i>Verify
+                                        </button>
+                                        <input type="text" 
+                                               class="form-control captcha-input-field-new flex-grow-1" 
+                                               id="recognized_input" 
+                                               name="recognized_input" 
+                                               placeholder="••••••" 
+                                               maxlength="6" 
+                                               pattern="[0-9]{6}"
+                                               required
+                                               autocomplete="off">
+                                        <div class="input-counter ms-2">
+                                            <span id="input-counter">0</span>/6
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <div class="captcha-actions">
+                                <button type="button" class="refresh-btn" onclick="regenerateCaptcha()">
+                                    <i class="fas fa-refresh me-2"></i>New Challenge
+                                </button>
+                                <button type="button" class="backspace-btn" onclick="backspaceInput()">
+                                    <i class="fas fa-backspace me-2"></i>Backspace
+                                </button>
+                                <button type="button" class="clear-btn" onclick="clearInput()">
+                                    <i class="fas fa-eraser me-2"></i>Clear
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="recognized_char" class="form-label">Current Recognized Character:</label>
+                            <div class="alert alert-light text-center">
+                                {% if recognized_char == 'B' %}
+                                <h3 class="mb-0" style="color: #007bff; font-weight: bold;">B</h3>
+                                {% else %}
+                                <h3 class="mb-0">{{ recognized_char if recognized_char else 'No character detected' }}</h3>
+                                {% endif %}
+                            </div>
+                            <div class="d-grid">
+                                <button type="button" class="btn add-char-btn btn-sm text-white" onclick="addToInput()">
+                                    <i class="fas fa-plus me-1"></i>Add to Captcha Input
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <h6>Recognition Mode</h6>
+                        <div class="row mb-3 mode-buttons">
+                            <div class="col-6">
+                                <button id="btn-num" type="button" class="btn btn-sm w-100 {% if recognition_mode == 'num' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                                    Numbers
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button id="btn-off" type="button" class="btn btn-sm w-100 {% if recognition_mode == 'off' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                                    Off
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button id="clear-canvas-btn" class="btn btn-danger">Clear Canvas</button>
+                        </div>
+                        
+                        <hr>
+                        
+                        <h6>Drawing Instructions:</h6>
+                        <div class="alert alert-info">
+                            <strong>Current Mode:</strong> 
+                            {% if recognition_mode == 'num' %}
+                                <span class="badge bg-warning">Numbers (0-9)</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Off - Select mode first</span>
+                            {% endif %}
+                        </div>
+                        {% if recognition_mode and recognition_mode != 'off' %}
+                        <ul class="small">
+                            <li><strong>Index finger only:</strong> Draw characters</li>
+                            <li><strong>Index + Middle fingers:</strong> Save and recognize</li>
+                            <li><strong>Index + Middle + Ring:</strong> Clear canvas</li>
+                            <li>Draw clearly and wait for recognition</li>
+                        </ul>
+                        {% else %}
+                        <ul class="small">
+                            <li>First, select the Numbers mode above</li>
+                            <li>Then use your index finger to draw characters in the air</li>
+                            <li>Use Index + Middle fingers to save and recognize</li>
+                        </ul>
+                        {% endif %}
+                        
+                        <div class="alert alert-warning mt-3">
+                            <strong>Note:</strong> {% if recognition_mode and recognition_mode != 'off' %}Make sure you're drawing numbers (0-9) as selected.{% else %}Select Numbers mode before drawing.{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function updateModeUI(mode){
+            const numBtn = document.getElementById('btn-num');
+            const offBtn = document.getElementById('btn-off');
+            const inputField = document.getElementById('recognized_input');
+            const label = document.querySelector('label[for="recognized_input"]');
+            const badge = document.querySelector('.alert-info .badge');
+            const modePanel = document.querySelector('.mode-buttons');
+
+            if (!numBtn || !offBtn) {
+                return;
+            }
+
+            const normalizedMode = mode === 'num' ? 'num' : 'off';
+
+            numBtn.classList.remove('btn-warning');
+            numBtn.classList.add('btn-outline-warning');
+            offBtn.classList.remove('btn-secondary');
+            offBtn.classList.add('btn-outline-secondary');
+
+            if (normalizedMode === 'num') {
+                numBtn.classList.remove('btn-outline-warning');
+                numBtn.classList.add('btn-warning');
+            } else {
+                offBtn.classList.remove('btn-outline-secondary');
+                offBtn.classList.add('btn-secondary');
+            }
+
+            if (inputField) {
+                inputField.placeholder = '••••••';
+                inputField.pattern = '[0-9]{6}';
+            }
+
+            if (label) {
+                label.textContent = 'Enter the digits you drew:';
+            }
+
+            if (badge) {
+                if (normalizedMode === 'num') {
+                    badge.className = 'badge bg-warning';
+                    badge.textContent = 'Numbers (0-9)';
+                } else {
+                    badge.className = 'badge bg-secondary';
+                    badge.textContent = 'Off - Select mode first';
+                }
+            }
+
+            if (modePanel) {
+                modePanel.classList.add('mode-switch');
+                setTimeout(() => modePanel.classList.remove('mode-switch'), 320);
+            }
+        }
+
+        async function setMode(mode){
+            try{
+                const res = await fetch('{{ url_for("set_mode") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({mode})
+                });
+
+                if(!res.ok){
+                    return;
+                }
+
+                const data = await res.json();
+                if(data && data.success){
+                    updateModeUI(data.mode);
+                    if (typeof clearInput === 'function') {
+                        clearInput();
+                    }
+                    if (typeof regenerateCaptcha === 'function') {
+                        regenerateCaptcha();
+                    }
+                }
+            } catch(err) {
+                console.error('Error setting mode', err);
+            }
+        }
+
+        document.getElementById('btn-num').addEventListener('click', ()=> setMode('num'));
+        document.getElementById('btn-off').addEventListener('click', ()=> setMode('off'));
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => document.body.classList.add('ready'), 50);
+
+            const currentMode = '{{ recognition_mode }}';
+            updateModeUI(currentMode);
+
+            setTimeout(() => {
+                setupAutoCharacterAddition();
+            }, 500);
+
+            const inputField = document.getElementById('recognized_input');
+            const counter = document.getElementById('input-counter');
+
+            if (inputField && counter) {
+                inputField.addEventListener('input', function() {
+                    counter.textContent = this.value.length;
+
+                    if (this.value.length === 6) {
+                        counter.style.color = '#48bb78';
+                        counter.style.fontWeight = '600';
+                    } else {
+                        counter.style.color = '#718096';
+                        counter.style.fontWeight = '500';
+                    }
+                });
+            }
+        });
+        
+        // Enhanced captcha functions
+        async function regenerateCaptcha() {
+            const refreshBtn = document.querySelector('.refresh-btn');
+            const originalText = refreshBtn.innerHTML;
+            
+            // Show loading state
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+            refreshBtn.disabled = true;
+            
+            try {
+                const res = await fetch('/regenerate_captcha', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (!res.ok) {
+                    throw new Error('Failed to generate new captcha');
+                }
+                
+                const data = await res.json();
+                if (data && data.success) {
+                    // Update captcha image with smooth transition
+                    const captchaImg = document.getElementById('captcha-image');
+                    if (captchaImg) {
+                        captchaImg.classList.add('refreshing');
+                        setTimeout(() => {
+                            captchaImg.src = 'data:image/png;base64,' + data.captcha_img;
+                            captchaImg.classList.remove('refreshing');
+                        }, 200);
+                    }
+                    
+
+                    
+                    // Clear and focus input field
+                    clearInput();
+                    
+                    // Show success feedback
+                    showNotification('New challenge generated!', 'success');
+                }
+            } catch (err) {
+                console.error('Error regenerating captcha', err);
+                showNotification('Failed to generate new captcha', 'error');
+            } finally {
+                // Restore button state
+                setTimeout(() => {
+                    refreshBtn.innerHTML = originalText;
+                    refreshBtn.disabled = false;
+                }, 500);
+            }
+        }
+        
+        function clearInput() {
+            const inputField = document.getElementById('recognized_input');
+            const counter = document.getElementById('input-counter');
+            
+            if (inputField) {
+                inputField.value = '';
+                inputField.focus();
+                
+                // Reset counter
+                if (counter) {
+                    counter.textContent = '0';
+                    counter.style.color = '#718096';
+                    counter.style.fontWeight = '500';
+                }
+            }
+        }
+        
+        function backspaceInput() {
+            const inputField = document.getElementById('recognized_input');
+            const counter = document.getElementById('input-counter');
+            
+            if (inputField && inputField.value.length > 0) {
+                // Remove the last character
+                inputField.value = inputField.value.slice(0, -1);
+                inputField.focus();
+                
+                // Update counter
+                if (counter) {
+                    counter.textContent = inputField.value.length;
+                    counter.style.color = '#718096';
+                    counter.style.fontWeight = '500';
+                }
+                
+                // Visual feedback
+                inputField.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    inputField.style.transform = 'scale(1)';
+                }, 150);
+                
+                showNotification('Character removed', 'info');
+            } else if (inputField) {
+                // If input is already empty
+                inputField.focus();
+                showNotification('Input is already empty', 'info');
+            }
+        }
+        
+        function addToInput() {
+            // More specific selector to get the recognized character
+            const recognizedCharElement = document.querySelector('.mb-3 .alert.alert-light h3');
+            if (!recognizedCharElement) {
+                console.error('Could not find recognized character element');
+                return;
+            }
+            
+            const recognizedChar = recognizedCharElement.textContent.trim();
+            console.log('Adding character to input:', recognizedChar);
+            
+            const inputField = document.getElementById('recognized_input');
+            
+            if (recognizedChar && recognizedChar !== 'None' && inputField) {
+                let isValidChar = /^\d$/.test(recognizedChar);
+                let expectedType = 'number (0-9)';
+
+                console.log('Recognition mode: Numeric');
+                
+                console.log('Is valid character for mode:', isValidChar, '| Character:', recognizedChar);
+                
+                // Always validate numeric characters and common problematic ones
+                if (/^\d$/.test(recognizedChar) || 
+                    recognizedChar === '9' || recognizedChar === '7' || 
+                    recognizedChar === '4' || recognizedChar === '1') {
+                    isValidChar = true;
+                    console.log(`Character '${recognizedChar}' validated for input`);
+                }
+                
+                if (isValidChar && inputField.value.length < 6) {
+                    // Check if this is a manual or auto addition
+                    const isAutoAdd = document.getElementById('autoAddToggle') && 
+                                     document.getElementById('autoAddToggle').checked;
+                    
+                    // Only add if not already the last character (avoid duplicates)
+                    const lastChar = inputField.value.slice(-1);
+                    if (lastChar !== recognizedChar) {
+                        // Add the character to the input field
+                        inputField.value += recognizedChar;
+                        console.log(`Character '${recognizedChar}' added to input field (${isAutoAdd ? 'auto' : 'manual'})`);
+                        console.log('Current input value:', inputField.value);
+                        
+                        // Ensure the change is registered properly
+                        const event = new Event('input', { bubbles: true });
+                        inputField.dispatchEvent(event);
+                    } else {
+                        console.log(`Skipping duplicate character '${recognizedChar}'`);
+                    }
+                    
+                    // Update counter
+                    const counter = document.getElementById('input-counter');
+                    if (counter) {
+                        counter.textContent = inputField.value.length;
+                        if (inputField.value.length === 6) {
+                            counter.style.color = '#48bb78';
+                            counter.style.fontWeight = '600';
+                        }
+                    }
+                    
+                    inputField.focus();
+                    
+                    // Visual feedback
+                    inputField.style.transform = 'scale(1.02)';
+                    setTimeout(() => {
+                        inputField.style.transform = 'scale(1)';
+                    }, 150);
+                    
+                    // Show success notification
+                    showNotification(`Character '${recognizedChar}' added`, 'success');
+                    
+                } else if (!isValidChar) {
+                    console.warn('Invalid character for current mode:', recognizedChar);
+                    showNotification(`Please draw a ${expectedType} for captcha input`, 'warning');
+                } else {
+                    const charType = 'digits';
+                    showNotification(`Captcha input is complete (6 ${charType})`, 'info');
+                }
+            }
+        }
+        
+        // Function to set up auto character addition - SIMPLIFIED VERSION
+        function setupAutoCharacterAddition() {
+            // Keep track of the last recognized character
+            let lastRecognizedChar = '';
+            let autoAddEnabled = true;
+            let lastProcessedTime = 0;
+            const debounceTime = 800; // Time between character additions (ms)
+            
+            // Track when we last added a character
+            let lastAddedTime = 0;
+            const minTimeBetweenAdds = 1000; // Minimum time between character additions (ms)
+            
+            // Simplified detection of character changes
+            function checkAndAddCharacter() {
+                if (!autoAddEnabled) return;
+                
+                const now = Date.now();
+                if (now - lastProcessedTime < debounceTime) return;
+                
+                // Get the current recognized character
+                const recognizedCharContainer = document.querySelector('.mb-3 .alert.alert-light h3');
+                if (!recognizedCharContainer) return;
+                
+                const currentChar = recognizedCharContainer.textContent.trim();
+                
+                // Only proceed if we have a valid character (not None or empty)
+                if (currentChar && currentChar !== 'None') {
+                    // If it's a new character or enough time has passed since we last added this character
+                    if (currentChar !== lastRecognizedChar || (now - lastAddedTime > minTimeBetweenAdds)) {
+                        console.log('Auto-add detected character:', currentChar);
+                        
+                        // Add the character to the input
+                        lastRecognizedChar = currentChar;
+                        lastProcessedTime = now;
+                        lastAddedTime = now;
+                        
+                        // Add a small delay before adding
+                        setTimeout(() => {
+                            // Add the character using the existing function
+                            addToInput();
+                            console.log('Character auto-added:', currentChar);
+                            
+                            // Show a notification
+                            showNotification(`Auto-added: ${currentChar}`, 'success');
+                        }, 100);
+                    }
+                }
+            }
+            
+            // Create the observer to watch for changes to the recognized character display
+            const observer = new MutationObserver(() => {
+                checkAndAddCharacter();
+            });
+            
+            // Start observing the recognized character element - using a simpler approach
+            const recognizedCharContainers = document.querySelectorAll('.mb-3 .alert.alert-light');
+            
+            // Try multiple possible containers to be sure we catch the right one
+            if (recognizedCharContainers.length > 0) {
+                recognizedCharContainers.forEach(container => {
+                    observer.observe(container, { 
+                        childList: true, 
+                        subtree: true, 
+                        characterData: true
+                    });
+                });
+                console.log(`Observer attached to ${recognizedCharContainers.length} recognized character containers`);
+            } else {
+                console.error('Could not find any recognized character containers');
+                
+                // Fallback to observing the entire body if we can't find specific containers
+                observer.observe(document.body, { childList: true, subtree: true });
+                console.log('Using fallback body-level observation');
+            }
+            
+            // Set up a regular polling mechanism to check for recognized characters
+            // This ensures we catch characters even if the MutationObserver misses them
+            let pollInterval = setInterval(() => {
+                if (autoAddEnabled) {
+                    checkAndAddCharacter();
+                }
+            }, 500); // Check every 500ms
+            
+            // Create a toggle switch for auto-add feature
+            const captchaActions = document.querySelector('.captcha-actions');
+            if (captchaActions) {
+                const toggleContainer = document.createElement('div');
+                toggleContainer.className = 'form-check form-switch d-flex justify-content-center mt-3';
+                toggleContainer.style.width = '100%';
+                toggleContainer.innerHTML = `
+                    <div class="toggle-container" style="display: flex; align-items: center;">
+                        <input class="form-check-input" type="checkbox" id="autoAddToggle" checked>
+                        <label class="form-check-label ms-2" for="autoAddToggle">Auto-add characters</label>
+                        <i class="fas fa-info-circle ms-2 text-primary" 
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="top" 
+                           title="Automatically adds recognized characters to the input field"></i>
+                    </div>
+                `;
+                captchaActions.insertAdjacentElement('afterend', toggleContainer);
+                
+                try {
+                    // Initialize tooltip (in a try-catch in case Bootstrap isn't fully loaded)
+                    const tooltipElement = toggleContainer.querySelector('.fa-info-circle');
+                    if (tooltipElement && window.bootstrap && bootstrap.Tooltip) {
+                        new bootstrap.Tooltip(tooltipElement);
+                    }
+                } catch (e) {
+                    console.log('Could not initialize tooltip:', e);
+                }
+                
+                // Add event listener for the toggle
+                const toggle = document.getElementById('autoAddToggle');
+                if (toggle) {
+                    toggle.addEventListener('change', function() {
+                        autoAddEnabled = this.checked;
+                        localStorage.setItem('autoAddEnabled', this.checked.toString());
+                        
+                        if (autoAddEnabled) {
+                            // Reset for fresh start
+                            lastRecognizedChar = '';
+                            lastProcessedTime = 0;
+                            
+                            showNotification(
+                                'Auto-add enabled: Characters will be added automatically', 
+                                'success'
+                            );
+                        } else {
+                            showNotification(
+                                'Auto-add disabled: Click "Add to Captcha" manually', 
+                                'info'
+                            );
+                        }
+                    });
+                    
+                    // Try to restore the previous toggle state
+                    const savedState = localStorage.getItem('autoAddEnabled');
+                    if (savedState !== null) {
+                        const shouldBeEnabled = savedState === 'true';
+                        toggle.checked = shouldBeEnabled;
+                        autoAddEnabled = shouldBeEnabled;
+                    }
+                }
+            }
+        }
+        
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'info'} position-fixed`;
+            notification.style.cssText = `
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                animation: slideInRight 0.3s ease-out;
+            `;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                ${message}
+            `;
+            
+            // Add to document
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease-in';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Dynamic character recognition polling
+        let pollingInterval;
+        
+        function startPolling() {
+            pollingInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/get_recognized_char');
+                    const data = await response.json();
+                    
+                    // Update the recognized character display
+                    const charDisplay = document.querySelector('.alert.alert-light h3');
+                    if (charDisplay) {
+                        const newChar = data.recognized_char || 'None';
+                        if (charDisplay.textContent.trim() !== newChar) {
+                            charDisplay.textContent = newChar;
+                            
+                            // Add visual feedback for updates
+                            charDisplay.style.color = '#667eea';
+                            charDisplay.style.transform = 'scale(1.1)';
+                            setTimeout(() => {
+                                charDisplay.style.color = '';
+                                charDisplay.style.transform = '';
+                            }, 300);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error polling recognized character:', error);
+                }
+            }, 500); // Poll every 500ms
+        }
+        
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        }
+        
+        // Start polling when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            startPolling();
+        });
+        
+        // Stop polling when page is hidden (optimization)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopPolling();
+            } else {
+                startPolling();
+            }
+        });
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            stopPolling();
+        });
+        
+        // AJAX Clear Canvas functionality
+        document.getElementById('clear-canvas-btn').addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            // Show loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Clearing...';
+            this.disabled = true;
+            
+            try {
+                const response = await fetch('/clear_canvas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to clear canvas');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Clear the recognized character display
+                    const recognizedCharElement = document.querySelector('.alert.alert-light h3');
+                    if (recognizedCharElement) {
+                        recognizedCharElement.textContent = 'None';
+                    }
+                    
+                    // Show success notification
+                    showNotification('Canvas cleared successfully', 'success');
+                }
+            } catch (error) {
+                console.error('Error clearing canvas:', error);
+                showNotification('Failed to clear canvas', 'error');
+            } finally {
+                // Restore button state
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                }, 500);
+            }
+        });
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

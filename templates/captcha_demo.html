@@ -1,0 +1,110 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Numeric Captcha Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .captcha-container {
+            margin: 30px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            max-width: 400px;
+        }
+        .captcha-img {
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 200px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .flash {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .actions {
+            margin-top: 20px;
+        }
+        .refresh-btn {
+            background-color: #007bff;
+            margin-right: 10px;
+        }
+        .refresh-btn:hover {
+            background-color: #0069d9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Enhanced Numeric Captcha Demo</h1>
+    <p>This demo showcases the improved Cloudflare-like numeric captchas.</p>
+    
+    <div class="captcha-container">
+        <h3>Verify you're human</h3>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <img class="captcha-img" src="data:image/png;base64,{{ captcha_img }}" alt="CAPTCHA">
+        
+        <form method="POST">
+            <div class="form-group">
+                <input type="text" name="captcha_input" placeholder="Enter the code above" required autofocus>
+            </div>
+            <div class="actions">
+                <a href="{{ url_for('home') }}" class="refresh-btn button">Refresh</a>
+                <button type="submit">Verify</button>
+            </div>
+        </form>
+    </div>
+    
+    <div>
+        <h3>About Enhanced Numeric Captchas</h3>
+        <p>These captchas are designed to look similar to real-world captchas like those used by Cloudflare.</p>
+        <p>Features include realistic character rendering, appropriate distortion, and noise patterns.</p>
+    </div>
+</body>
+</html>
+            
