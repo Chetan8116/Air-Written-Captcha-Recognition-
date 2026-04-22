@@ -1,0 +1,11 @@
+#pip install -r requirement.txt
+opencv-contrib-python==4.7.0.72  # Updated with contrib package that has DNN typing
+keyboard==0.13.5
+mediapipe
+numpy==1.19.5
+pygame==2.0.1
+tensorflow>=2.5.0  # Minimum version for compatibility with saved models
+flask==2.1.0
+Pillow
+matplotlib>=3.5.0
+scikit-learn>=1.0.0
